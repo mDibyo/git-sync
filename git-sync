@@ -36,7 +36,7 @@ function git_sync {
     SYNCING=false
 }
 
-function inotifywait_timeout() {
+function inotifywait_timeout {
     local timeout=$1
     [ -z ${timeout} ] && timeout=-1
 
@@ -47,28 +47,31 @@ function inotifywait_debounce {
     local timeout=$1
     [ -z ${timeout} ] && timeout=-1
 
-    inotifywait_timeout || exit $?
+    inotifywait_timeout
     while [ $? -eq 0 ]; do
         inotifywait_timeout ${timeout}
     done
-    [ $? -ne 2 ] && exit $?
     return 0
 }
 
 function unsync {
+    local ec=$?
+
     echo "Unsyncing..."
     if [ ${SYNCING} = true ]; then
         git reset HEAD^ > /dev/null
     fi
     git push -f 2> /dev/null && rm -f ${SYNC_FILE}
+
+    exit ${ec}
 }
 
 function main {
     trap unsync SIGHUP SIGINT SIGTERM
-    git_sync || exit $?
+    git_sync
     while :; do
-        inotifywait_debounce ${DEBOUNCE_TIMEOUT} || exit $?
-        git_sync || exit $?
+        inotifywait_debounce ${DEBOUNCE_TIMEOUT}
+        git_sync
     done
 }
 
