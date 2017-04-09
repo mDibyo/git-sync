@@ -3,6 +3,7 @@
 COMMITTER_NAME="Git Synchronizer"
 COMMITTER_EMAIL="synchronizer@git-sync.org"
 SYNC_FILE="./.git-sync"
+SYNCING=false
 
 function git_sync {
     local now=$(date --iso-8601=seconds)
@@ -17,6 +18,7 @@ function git_sync {
         # Commit did not succeed.
         return $?
     fi
+    SYNCING=true
 
     local tree_hash=$(git log -1 --format="%T")
     if [ "$(cat ${SYNC_FILE} 2> /dev/null)" != ${tree_hash} ]; then
@@ -26,11 +28,12 @@ function git_sync {
     fi
 
     git reset HEAD^ > /dev/null && echo ${tree_hash} > ${SYNC_FILE}
+    SYNCING=false
 }
 
 function unsync {
     echo "Unsyncing..."
-    if [ $(git log -1 --format="%T") != "$(cat ${SYNC_FILE} 2> /dev/null)" ]; then
+    if [ ${SYNCING} = true ]; then
         git reset HEAD^ > /dev/null
     fi
     git push -f 2> /dev/null && rm -f ${SYNC_FILE}
