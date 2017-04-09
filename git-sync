@@ -35,7 +35,7 @@ function main {
     trap unsync SIGHUP SIGINT SIGTERM
     git_sync || exit $?
     while :; do
-        inotifywait -rq --exclude \.git --event modify . || exit $?
+        inotifywait -rqq --exclude \.git --event modify . || exit $?
         git_sync || exit $?
     done
 }
