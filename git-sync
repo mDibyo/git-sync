@@ -2,8 +2,12 @@
 
 COMMITTER_NAME="Git Synchronizer"
 COMMITTER_EMAIL="synchronizer@git-sync.org"
+
 IGNORE_FILE=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/ignore
 SYNC_FILE="./.git-sync"
+
+DEBOUNCE_TIMEOUT=1
+
 SYNCING=false
 
 function git_sync {
@@ -32,6 +36,25 @@ function git_sync {
     SYNCING=false
 }
 
+function inotifywait_timeout() {
+    local timeout=$1
+    [ -z ${timeout} ] && timeout=-1
+
+    inotifywait -rqq --exclude \.git --fromfile ${IGNORE_FILE} --event modify --timeout ${timeout} .
+}
+
+function inotifywait_debounce {
+    local timeout=$1
+    [ -z ${timeout} ] && timeout=-1
+
+    inotifywait_timeout || exit $?
+    while [ $? -eq 0 ]; do
+        inotifywait_timeout ${timeout}
+    done
+    [ $? -ne 2 ] && exit $?
+    return 0
+}
+
 function unsync {
     echo "Unsyncing..."
     if [ ${SYNCING} = true ]; then
@@ -44,7 +67,7 @@ function main {
     trap unsync SIGHUP SIGINT SIGTERM
     git_sync || exit $?
     while :; do
-        inotifywait -rqq --exclude \.git --fromfile ${IGNORE_FILE} --event modify . || exit $?
+        inotifywait_debounce ${DEBOUNCE_TIMEOUT} || exit $?
         git_sync || exit $?
     done
 }
