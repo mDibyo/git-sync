@@ -11,7 +11,7 @@ function git_sync {
         return
     fi
 
-    git commit -am "WIP - ${now}" --author "${AUTHOR}" > /dev/null; if [ $? -ne 0 ]; then
+    git commit --allow-empty -am "WIP - ${now}" --author "${AUTHOR}" > /dev/null; if [ $? -ne 0 ]; then
         # Commit did not succeed.
         return $?
     fi
@@ -35,7 +35,7 @@ function main {
     trap unsync SIGHUP SIGINT SIGTERM
     git_sync || exit $?
     while :; do
-        inotifywait -rqq --exclude \.git --event modify . || exit $?
+        inotifywait -rqq --exclude \.git --exclude \.git-sync --event modify . || exit $?
         git_sync || exit $?
     done
 }
