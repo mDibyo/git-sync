@@ -6,7 +6,7 @@ SYNC_FILE="./.git-sync"
 function git_sync {
     local now=$(date --iso-8601=seconds)
 
-    git diff --exit-code > /dev/null; if [ $? -eq 0 ]; then
+    git diff --exit-code HEAD > /dev/null; if [ $? -eq 0 ]; then
         # No differences since last commit.
         return
     fi
