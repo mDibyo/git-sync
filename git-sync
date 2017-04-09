@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-AUTHOR="Git Synchronizer <synchronizer@git-sync.org>"
+COMMITTER_NAME="Git Synchronizer"
+COMMITTER_EMAIL="synchronizer@git-sync.org"
 SYNC_FILE="./.git-sync"
 
 function git_sync {
@@ -11,7 +12,8 @@ function git_sync {
         return
     fi
 
-    git commit --allow-empty -am "WIP - ${now}" --author "${AUTHOR}" > /dev/null; if [ $? -ne 0 ]; then
+    GIT_COMMITTER_NAME=${COMMITTER_NAME} GIT_COMMITTER_EMAIL=${COMMITTER_EMAIL} \
+            git commit --allow-empty -am "WIP - ${now}" > /dev/null; if [ $? -ne 0 ]; then
         # Commit did not succeed.
         return $?
     fi
