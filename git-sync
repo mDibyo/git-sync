@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 AUTHOR="Git Synchronizer <synchronizer@git-sync.org>"
+SYNC_FILE="./.git-sync"
 
 function git_sync {
     local now=$(date --iso-8601=seconds)
@@ -15,13 +16,19 @@ function git_sync {
         return $?
     fi
 
-    git push -f 2> /dev/null && echo "Synced ${now}" || exit $?
+    local tree_hash=$(git log -1 --format="%T")
+    if [ "$(cat ${SYNC_FILE} 2> /dev/null)" != ${tree_hash} ]; then
+        echo "Syncing..."
+        git push -f 2> /dev/null && echo ${tree_hash} > ${SYNC_FILE} || exit $?
+        echo "Synced ${now}"
+    fi
+
     git reset HEAD^ > /dev/null
 }
 
 function unsync {
     echo "Unsyncing..."
-    git push -f 2> /dev/null
+    git push -f 2> /dev/null && rm -f ${SYNC_FILE}
 }
 
 function main {
