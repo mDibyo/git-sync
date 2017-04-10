@@ -27,9 +27,9 @@ function git_sync {
 
     local tree_hash=$(git log -1 --format="%T")
     if [ "$(cat ${SYNC_FILE} 2> /dev/null)" != ${tree_hash} ]; then
-        echo "Syncing..."
+        printf '%s' "Syncing... "
         git push -f 2> /dev/null || return $?
-        echo "Synced ${now}"
+        printf '%s\n' "Done ${now}"
     fi
 
     git reset HEAD^ > /dev/null && echo ${tree_hash} > ${SYNC_FILE}
@@ -57,7 +57,7 @@ function inotifywait_debounce {
 function unsync {
     local ec=$?
 
-    echo "Unsyncing..."
+    printf '\n%s\n' "Unsyncing..."
     if [ ${SYNCING} = true ]; then
         git reset HEAD^ > /dev/null
     fi
