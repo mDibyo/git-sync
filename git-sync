@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# Colors
+NORMAL=$(printf '\33[0m')
+RED=$(printf '\33[31m')
+BRIGHT_RED=$(printf '\33[31;1m')
+GREEN=$(printf '\33[32m')
+BRIGHT_GREEN=$(printf '\33[32;1m')
+
 COMMITTER_NAME="Git Synchronizer"
 COMMITTER_EMAIL="synchronizer@git-sync.org"
 
@@ -27,9 +34,9 @@ function git_sync {
 
     local tree_hash=$(git log -1 --format="%T")
     if [ "$(cat ${SYNC_FILE} 2> /dev/null)" != ${tree_hash} ]; then
-        printf '%s' "Syncing... "
+        printf '%s' "${GREEN}Syncing... ${NORMAL}"
         git push -f 2> /dev/null || return $?
-        printf '%s\n' "Done ${now}"
+        printf '%s\n' "${BRIGHT_GREEN}Done: ${now}${NORMAL}"
     fi
 
     git reset HEAD^ > /dev/null && echo ${tree_hash} > ${SYNC_FILE}
@@ -57,11 +64,12 @@ function inotifywait_debounce {
 function unsync {
     local ec=$?
 
-    printf '\n%s\n' "Unsyncing..."
+    printf '\n%s' "${RED}Unsyncing... ${NORMAL}"
     if [ ${SYNCING} = true ]; then
         git reset HEAD^ > /dev/null
     fi
     git push -f 2> /dev/null && rm -f ${SYNC_FILE}
+    printf '%s\n' "${BRIGHT_RED}Done${NORMAL}"
 
     exit ${ec}
 }
