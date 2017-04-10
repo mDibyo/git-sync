@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# Sync local changes with a remote repository as a Work in progress commit, capping
+# off the remote version of the current local branch.
 
 # Colors
 NORMAL=$(printf '\33[0m')
