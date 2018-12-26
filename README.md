@@ -4,7 +4,9 @@ Git Synchronizer
 
 Git Synchronizer allows you to sync local changes with a remote repository
 as a Work in progress commit, capping off the remote version of the current 
-local branch. It is meant for testing changes when a local server can not be
+local branch. Synchronization happens on file save(!!!)
+
+It is meant for testing changes when a local server can not be
 run and a remote server is serving the contents of the git repository 
 remotely.
 
